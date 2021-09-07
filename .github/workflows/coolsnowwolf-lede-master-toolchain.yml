@@ -9,8 +9,8 @@
 name: Coolsnowwolf/Lede Toolchain Build
 on:
   workflow_dispatch:
-#  schedule:
-#    - cron: 0 18 * * *
+  schedule:
+    - cron: 0 15 * * *
 #  watch:
 #    types: started
 
