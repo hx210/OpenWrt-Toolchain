@@ -17,6 +17,7 @@ on:
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
+  DIY_PI: config/bcm27xx/rpi.sh
   TZ: Asia/Shanghai
 
 jobs:
@@ -55,6 +56,8 @@ jobs:
       - name: Install Feeds
         id: feeds
         run: |
+          chmod +x $DIY_PI
+          ../$DIY_PI
           cd openwrt
           echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
           ./scripts/feeds update -a 
