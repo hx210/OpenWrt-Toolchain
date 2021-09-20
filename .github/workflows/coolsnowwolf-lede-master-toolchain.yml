@@ -59,11 +59,6 @@ jobs:
         id: feeds
         run: |
           cd openwrt
-          if [[ $PLATFORM == *"bcm27xx"* ]]; then
-            sed -i "/KERNEL_PATCHVER=/c\KERNEL_PATCHVER=5.4" "target/linux/bcm27xx/Makefile"
-            find target/linux/bcm27xx -type f -name 'Makefile' -exec grep "KERNEL_PATCHVER" "{}" \;
-          fi
-          ls #-R .?* Read all hidden files
           echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
           ./scripts/feeds update -a 
           ./scripts/feeds install -a
