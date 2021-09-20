@@ -17,7 +17,6 @@ on:
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
-  DIY_PI: config/bcm27xx/rpi.sh
   TZ: Asia/Shanghai
 
 jobs:
