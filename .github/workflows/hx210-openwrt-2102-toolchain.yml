@@ -113,9 +113,13 @@ jobs:
           df -hT $PWD
 
       - name: Upload Image To Release
-        uses: softprops/action-gh-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        id: create_release
+        uses: ncipollo/release-action@v1 #https://github.com/ncipollo/release-action/tree/main
         with:
-          tag_name: ${{ steps.generate.outputs.RELEASE_TAG }}
-          files: output/*
+          name: ${{ steps.generate.outputs.RELEASE_TAG }}
+          allowUpdates: true
+          tag: openwrt-openwrt-openwrt-21.02
+          commit: main
+          replacesArtifacts: true
+          token: ${{ secrets.WORKFLOW_TOKEN }}
+          artifacts: output/*
