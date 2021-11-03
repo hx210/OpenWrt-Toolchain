@@ -6,11 +6,11 @@
 # Blog: https://p3terx.com
 #=================================================
 
-name: hx210/Lede Toolchain Build dev
+name: hx210/Lede Toolchain Build v0.0.1
 on:
   workflow_dispatch:
-  schedule:
-    - cron: 0 20 */5 * *
+  # schedule:
+  #   - cron: 0 20 */5 * *
 #  watch:
 #    types: started
 
@@ -112,15 +112,10 @@ jobs:
           echo "::set-output name=RELEASE_TAG::$REPO_USER-$REPO_NAME-$REPO_BRANCH"
           df -hT $PWD
 
-
       - name: Upload Image To Release
-        id: create_release
-        uses: ncipollo/release-action@v1 #https://github.com/ncipollo/release-action/tree/main
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: "hx210-lede-master"
-          allowUpdates: true
-          tag: hx210-lede-master
-          commit: main
-          replacesArtifacts: true
-          token: ${{ secrets.WORKFLOW_TOKEN }}
-          artifacts: output/*
+          tag_name: ${{ steps.generate.outputs.RELEASE_TAG }}
+          files: output/*

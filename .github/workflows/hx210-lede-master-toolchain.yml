@@ -112,10 +112,15 @@ jobs:
           echo "::set-output name=RELEASE_TAG::$REPO_USER-$REPO_NAME-$REPO_BRANCH"
           df -hT $PWD
 
+
       - name: Upload Image To Release
-        uses: softprops/action-gh-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        id: create_release
+        uses: ncipollo/release-action@v1 #https://github.com/ncipollo/release-action/tree/main
         with:
-          tag_name: ${{ steps.generate.outputs.RELEASE_TAG }}
-          files: output/*
+          name: "hx210-lede-master"
+          allowUpdates: true
+          tag: hx210-lede-master
+          commit: main
+          replacesArtifacts: true
+          token: ${{ secrets.WORKFLOW_TOKEN }}
+          artifacts: output/*
