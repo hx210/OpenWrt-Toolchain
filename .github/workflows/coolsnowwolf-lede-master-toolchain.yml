@@ -25,7 +25,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        PLATFORM: [bcm27xx/bcm2708, bcm27xx/bcm2709, bcm27xx/bcm2710, bcm27xx/bcm2711, rockchip/armv8, sunxi/cortexa7, x86/64, x86/generic]
+        PLATFORM: [bcm27xx/bcm2708, bcm27xx/bcm2709, bcm27xx/bcm2710, bcm27xx/bcm2711, rockchip/nanopi-r2s, rockchip/nanopi-r4s, rockchip/orangepi-r1-plus, sunxi/cortexa7, x86/64, x86/generic]
 
     steps:
       - name: Checkout
@@ -66,6 +66,10 @@ jobs:
         id: download
         run: |
           mv config/$PLATFORM.config $OPENWRTROOT/.config
+          if [[ $PLATFORM == *"rockchip"* ]]; then
+            echo "This is rockchip, using rockhip config"
+            cat config/rockchip/armv8.config >> $OPENWRTROOT/.config
+          fi
           cd $OPENWRTROOT
           make defconfig
           make download -j16
