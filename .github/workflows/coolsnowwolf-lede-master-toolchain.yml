@@ -87,9 +87,11 @@ jobs:
         id: toolchain
         run: |
           cd $OPENWRTROOT
-          if [[ $PLATFORM == *"x86"* ]]; then
-            grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/CONFIG_TARGET_(.*)_DEVICE_.*=y/\1/' > DEVICE_NAME
+          if [[ $PLATFORM == *"86"* ]]; then
+            echo "This is x86, using x86 device name"
+            grep '^CONFIG_TARGET.*DEVICE_generic=y' .config | sed -r 's/CONFIG_TARGET_(.*)_DEVICE_generic=y/\1/' > DEVICE_NAME
           else
+            echo "This is not x86, using default device name"
             grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
           fi
           [ -s DEVICE_NAME ] && echo "DEVICE_NAME=$(cat DEVICE_NAME)" >> $GITHUB_ENV
