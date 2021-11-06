@@ -85,11 +85,13 @@ jobs:
 
       - name: Compile Toolchain
         id: toolchain
+        env:
+          PLATFORM: ${{ matrix.PLATFORM }}
         run: |
           cd $OPENWRTROOT
           if [[ $PLATFORM == *"86"* ]]; then
             echo "This is x86, using x86 device name"
-            grep '^CONFIG_TARGET.*DEVICE_generic=y' .config | sed -r 's/CONFIG_TARGET_(.*)_DEVICE_generic=y/\1/' > DEVICE_NAME
+            grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/CONFIG_TARGET_(.*)_DEVICE.*=y/\1/' > DEVICE_NAME
           else
             echo "This is not x86, using default device name"
             grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
