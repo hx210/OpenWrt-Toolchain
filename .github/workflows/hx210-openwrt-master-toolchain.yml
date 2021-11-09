@@ -146,4 +146,12 @@ jobs:
 
       - name: 电报机器人信息通知
         run: |
-          curl -k --data chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" --data "text=我亲爱的✨主人✨：您的-固件顺利编译完成了！💐https://github.com/hx210/Openwrt-R -工具链 #工具链" "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage"
+          curl -k --data chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" --data "text=我亲爱的✨主人✨：您的固件开始编译！💐https://github.com/hx210/Openwrt-R -工具链 #工具链" "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage"
+
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.REPO_TOKEN }}
+          repository: hx210/Openwrt-R
+          event-type: Source Code Update
+          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
