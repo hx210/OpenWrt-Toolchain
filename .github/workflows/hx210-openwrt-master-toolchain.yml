@@ -123,3 +123,27 @@ jobs:
           replacesArtifacts: true
           token: ${{ secrets.WORKFLOW_TOKEN }}
           artifacts: output/*
+
+
+  Upload:
+    needs: [Build]
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+
+      - name: Show system
+        run: |
+          echo -e "Total CPU cores\t: $(nproc)"
+          cat /proc/cpuinfo | grep 'model name'
+          free -h
+          uname -a
+          [ -f /proc/version ] && cat /proc/version
+          [ -f /etc/issue.net ] && cat /etc/issue.net
+          [ -f /etc/issue ] && cat /etc/issue
+          ulimit -a
+
+      - name: 电报机器人信息通知
+        run: |
+          curl -k --data chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" --data "text=我亲爱的✨主人✨：您的-固件顺利编译完成了！💐https://github.com/hx210/Openwrt-R -工具链 #工具链" "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage"
