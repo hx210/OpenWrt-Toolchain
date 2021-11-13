@@ -56,8 +56,8 @@ jobs:
         id: feeds
         run: |
           cd openwrt
-          sed -i '/$(SDK_BUILD_DIR)\/$(STAGING_SUBDIR_HOST)\/usr\/bin/d' openwrt/target/sdk/Makefile
-          sed -i 's/LICENSE/LICENSES/g' openwrt/target/toolchain/Makefile
+          sed -i '/$(SDK_BUILD_DIR)\/$(STAGING_SUBDIR_HOST)\/usr\/bin/d' target/sdk/Makefile
+          sed -i 's/LICENSE/LICENSES/g' target/toolchain/Makefile
           echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
           ./scripts/feeds update -a 
           ./scripts/feeds install -a
