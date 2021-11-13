@@ -47,8 +47,6 @@ jobs:
         run: |
           df -hT $PWD
           git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
-          sed -i '/$(SDK_BUILD_DIR)\/$(STAGING_SUBDIR_HOST)\/usr\/bin/d' target/sdk/Makefile
-          sed -i 's/LICENSE/LICENSES/g' target/toolchain/Makefile
           export REPO_USER="$(echo $REPO_URL | awk -F '/' '{print $(NF-1)}')"
           echo "REPO_USER=$REPO_USER" >> $GITHUB_ENV
           export REPO_NAME="$(echo $REPO_URL | awk -F '/' '{print $(NF)}')"
@@ -58,6 +56,8 @@ jobs:
         id: feeds
         run: |
           cd openwrt
+          sed -i '/$(SDK_BUILD_DIR)\/$(STAGING_SUBDIR_HOST)\/usr\/bin/d' openwrt/target/sdk/Makefile
+          sed -i 's/LICENSE/LICENSES/g' openwrt/target/toolchain/Makefile
           echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
           ./scripts/feeds update -a 
           ./scripts/feeds install -a
