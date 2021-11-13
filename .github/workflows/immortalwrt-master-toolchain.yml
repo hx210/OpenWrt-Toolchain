@@ -16,7 +16,7 @@ on:
 
 env:
   REPO_URL: https://github.com/immortalwrt/immortalwrt
-  REPO_BRANCH: master
+  REPO_BRANCH: openwrt-18.06-k5.4
   TZ: Asia/Jakarta
 
 jobs:
@@ -119,7 +119,7 @@ jobs:
           mksquashfs openwrt $FILE_NAME -force-gid 1001 -force-uid 1001 -comp xz
           mkdir output
           mv $FILE_NAME output
-          echo "::set-output name=RELEASE_TAG::$REPO_USER-$REPO_NAME-$REPO_BRANCH"
+          echo "::set-output name=RELEASE_TAG::$REPO_USER-$REPO_NAME"
           df -hT $PWD
 
       - name: Upload Image To Release
