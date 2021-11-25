@@ -67,6 +67,7 @@ jobs:
         run: |
           mv config/$PLATFORM.config $OPENWRTROOT/.config
           cd $OPENWRTROOT
+          bash $GITHUB_WORKSPACE/tools.sh
           make defconfig
           make download -j16
           find dl -size -1024c -exec ls -l {} \;
