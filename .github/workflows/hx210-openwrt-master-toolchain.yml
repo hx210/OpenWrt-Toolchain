@@ -9,8 +9,8 @@
 name: hx210/openwrt Toolchain Build
 on:
   workflow_dispatch:
-  schedule:
-    - cron: 0 20 */14 * *
+  # schedule:
+  #   - cron: 0 20 */14 * *
 #  watch:
 #    types: started
 

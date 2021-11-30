@@ -3,8 +3,8 @@ name: Delete Workflow Runs
 on:
   workflow_dispatch:
 
-  schedule:
-    - cron: 0 20 */14 * *
+  # schedule:
+  #   - cron: 0 20 */14 * *
 
 jobs:
   del_runs:
