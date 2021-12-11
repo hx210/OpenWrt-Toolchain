@@ -9,8 +9,8 @@
 name: ImmortalWrt Toolchain Build
 on:
   workflow_dispatch:
-  schedule:
-    - cron: 0 13 * * *
+#  schedule:
+#    - cron: 0 13 * * *
 #  watch:
 #    types: started
 
