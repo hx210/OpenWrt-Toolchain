@@ -1,0 +1,134 @@
+#=================================================
+# https://github.com/P3TERX/Actions-OpenWrt
+# Description: Build OpenWrt using GitHub Actions
+# Lisence: MIT
+# Author: P3TERX
+# Blog: https://p3terx.com
+#=================================================
+
+name: Coolsnowwolf Lede Toolchain Build
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: 0 15 * * *
+#  watch:
+#    types: started
+
+env:
+  REPO_URL: https://github.com/coolsnowwolf/lede
+  REPO_BRANCH: master
+  TZ: Asia/Jakarta
+
+jobs:
+  Build:
+    runs-on: ubuntu-18.04
+    strategy:
+      fail-fast: false
+      matrix:
+        PLATFORM: [armvirt/64, bcm27xx/bcm2708, bcm27xx/bcm2709, bcm27xx/bcm2710, bcm27xx/bcm2711, rockchip/nanopi-r2c, rockchip/nanopi-r2s, rockchip/nanopi-r4s, rockchip/orangepi-r1-plus, sunxi/cortexa7, x86/64, x86/generic]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+
+      - name: Initialization Environment
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
+          sudo -E apt-get -qq update
+          sudo -E apt-get -qq install $(curl -fsSL git.io/depends-ubuntu-1804)
+          sudo -E apt-get -qq autoremove --purge
+          sudo -E apt-get -qq clean
+          sudo ln -sf /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
+
+      - name: Clone Source Code
+        id: clone
+        run: |
+          df -hT $PWD
+          git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
+          export REPO_USER="$(echo $REPO_URL | awk -F '/' '{print $(NF-1)}')"
+          echo "REPO_USER=$REPO_USER" >> $GITHUB_ENV
+          export REPO_NAME="$(echo $REPO_URL | awk -F '/' '{print $(NF)}')"
+          echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV
+
+      - name: Install Feeds
+        id: feeds
+        run: |
+          cd openwrt
+          echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
+          ./scripts/feeds update -a 
+          ./scripts/feeds install -a
+
+      - name: Download Packages
+        env:
+          PLATFORM: ${{ matrix.PLATFORM }}
+        id: download
+        run: |
+          mv config/$PLATFORM.config $OPENWRTROOT/.config
+          if [[ $PLATFORM == *"rockchip"* ]]; then
+            echo "This is rockchip, using rockhip config"
+            cat config/rockchip/armv8.config >> $OPENWRTROOT/.config
+          fi
+          cd $OPENWRTROOT
+          make defconfig
+          make download -j16
+          find dl -size -1024c -exec ls -l {} \;
+          find dl -size -1024c -exec rm -f {} \;
+
+      - name: Compile Tools
+        id: tools
+        run: |
+          cd $OPENWRTROOT
+          echo -e "$(nproc) thread compile"
+          make tools/compile -j$(nproc) || make tools/compile -j1 V=s
+
+      - name: Compile Toolchain
+        id: toolchain
+        env:
+          PLATFORM: ${{ matrix.PLATFORM }}
+        run: |
+          cd $OPENWRTROOT
+          if [[ $PLATFORM == *"86"* ]]; then
+            echo "This is x86, using x86 device name"
+            grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/CONFIG_TARGET_(.*)_DEVICE.*=y/\1/' > DEVICE_NAME
+          elif [[ $PLATFORM == *"armvirt"* ]]; then
+            echo "This is armvirt64, using armvirt64 device name"
+            grep '^CONFIG_TARGET.*Default=y' .config | sed -r 's/CONFIG_TARGET_(.*)_Default=y/\1/' > DEVICE_NAME
+          else
+            echo "This is not x86 neither armvirt64, using default device name"
+            grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
+          fi
+          [ -s DEVICE_NAME ] && echo "DEVICE_NAME=$(cat DEVICE_NAME)" >> $GITHUB_ENV
+          echo -e "$(nproc) thread compile"
+          make toolchain/compile -j$(nproc) || make toolchain/compile -j1 V=s
+          make diffconfig
+          cd $OPENWRTROOT/bin/targets/*
+          cd *
+          rm *
+
+      - name: Clean Files
+        id: clean
+        run: |
+          cd $OPENWRTROOT
+          make clean
+          rm -rf tmp logs .config* dl
+          ./scripts/feeds clean
+
+      - name: Generate Toolchain Image
+        id: generate
+        run: |
+          export FILE_NAME="toolchain-image-$REPO_USER-$REPO_NAME-$REPO_BRANCH-$DEVICE_NAME.img"
+          mksquashfs openwrt $FILE_NAME -force-gid 1001 -force-uid 1001 -comp xz
+          mkdir output
+          mv $FILE_NAME output
+          echo "::set-output name=RELEASE_TAG::$REPO_USER-$REPO_NAME-$REPO_BRANCH"
+          df -hT $PWD
+
+      - name: Upload Image To Release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: test-${{ steps.generate.outputs.RELEASE_TAG }}
+          files: output/*
