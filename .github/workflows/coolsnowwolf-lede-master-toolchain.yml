@@ -92,11 +92,16 @@ jobs:
           if [[ $PLATFORM == *"86"* ]]; then
             echo "This is x86, using x86 device name"
             grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/CONFIG_TARGET_(.*)_DEVICE.*=y/\1/' > DEVICE_NAME
+            sed -i "/KERNEL_PATCHVER=/c\KERNEL_PATCHVER=5.4" "target/linux/x86/Makefile"
           elif [[ $PLATFORM == *"armvirt"* ]]; then
             echo "This is armvirt64, using armvirt64 device name"
             grep '^CONFIG_TARGET.*Default=y' .config | sed -r 's/CONFIG_TARGET_(.*)_Default=y/\1/' > DEVICE_NAME
+          elif [[ $PLATFORM == *"bcm27xx"* ]]; then
+            echo "This is $PLATFORM, using $PLATFORM device name"
+            grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
+            sed -i "/KERNEL_PATCHVER=/c\KERNEL_PATCHVER=5.4" "target/linux/bcm27xx/Makefile"
           else
-            echo "This is not x86 neither armvirt64, using default device name"
+            echo "This is not x86 neither armvirt64 or bcm27xx, using default device name"
             grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
           fi
           [ -s DEVICE_NAME ] && echo "DEVICE_NAME=$(cat DEVICE_NAME)" >> $GITHUB_ENV
