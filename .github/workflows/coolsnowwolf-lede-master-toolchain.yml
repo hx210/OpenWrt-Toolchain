@@ -93,6 +93,7 @@ jobs:
             echo "This is x86, using x86 device name"
             grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/CONFIG_TARGET_(.*)_DEVICE.*=y/\1/' > DEVICE_NAME
             sed -i "/KERNEL_PATCHVER=/c\KERNEL_PATCHVER=5.4" "target/linux/x86/Makefile"
+            sed -i "/KERNEL_TESTING_PATCHVER=/c\KERNEL_TESTING_PATCHVER=5.15" "target/linux/x86/Makefile"
           elif [[ $PLATFORM == *"armvirt"* ]]; then
             echo "This is armvirt64, using armvirt64 device name"
             grep '^CONFIG_TARGET.*Default=y' .config | sed -r 's/CONFIG_TARGET_(.*)_Default=y/\1/' > DEVICE_NAME
